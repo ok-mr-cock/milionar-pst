@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kdo je pánem šancí? – pravděpodobnost</title>
+<style>
+:root{--bg:#e8edf8;--card:#fff;--ink:#14213d;--mut:#5b6785;--line:#bcc6e0;--grid:#e3e8f4;--gold:#c25e00;--goldbg:#ffe9d1;--ok:#13803f;--okbg:#d9f3e3;--bad:#c4302f;--badbg:#fbe0e0;--curve:#d9480f;--btn:#14213d;--btnink:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a0f24;--card:#141c3d;--ink:#eef1ff;--mut:#9fb0e6;--line:#34479a;--grid:#1f2b66;--gold:#ffae42;--goldbg:#4a3512;--ok:#4cd68a;--okbg:#0f4a2c;--bad:#ff7d7d;--badbg:#521b1b;--curve:#ff8a4d;--btn:#ffae42;--btnink:#14213d;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0a0f24;--card:#141c3d;--ink:#eef1ff;--mut:#9fb0e6;--line:#34479a;--grid:#1f2b66;--gold:#ffae42;--goldbg:#4a3512;--ok:#4cd68a;--okbg:#0f4a2c;--bad:#ff7d7d;--badbg:#521b1b;--curve:#ff8a4d;--btn:#ffae42;--btnink:#14213d;color-scheme:dark}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;-webkit-text-size-adjust:100%;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:540px;margin:0 auto;padding:14px}
+h1{font-size:1.6rem;margin:8px 0;text-align:center}h2{font-size:1rem;margin:14px 0 8px;font-weight:600}p{margin:8px 0}
+.hero{text-align:center;padding:24px 4px}.hero .m{font-size:3rem}
+button{font:inherit;cursor:pointer;color:inherit;-webkit-appearance:none;appearance:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.big{display:block;width:100%;padding:13px;border:0;border-radius:12px;background:var(--btn);color:var(--btnink);font-weight:700;margin-top:10px}
+.big:disabled{opacity:.4;cursor:default}
+.ghost{display:block;width:100%;padding:10px;margin-top:8px;border:1px dashed var(--line);border-radius:12px;background:none;color:var(--mut);font-size:.9rem}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+#qi{font-size:.9rem;color:var(--mut);line-height:1.25}#qi b{color:var(--ink)}
+.ll{display:flex;gap:6px}
+.lf{min-width:46px;height:42px;padding:0 10px;border-radius:21px;border:2px solid var(--gold);background:var(--card);color:var(--gold);font-weight:700;font-size:.85rem}
+.lf:disabled{cursor:default}.lf.used{opacity:.3;text-decoration:line-through;border-color:var(--line);color:var(--mut)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px}
+svg{display:block;width:100%;height:auto}
+.ax{stroke:var(--ink);stroke-width:2.5}.tk{stroke:var(--ink);stroke-width:1.5}.lb{fill:var(--ink);font-size:17px;text-anchor:middle;font-family:system-ui,sans-serif}.pt{fill:var(--curve)}
+.wp{padding:16px 10px;font-size:1.15rem;line-height:1.5}
+.opts{display:grid;gap:8px}@media(min-width:520px){.opts{grid-template-columns:1fr 1fr}}
+.opt{display:flex;align-items:center;gap:10px;width:100%;min-height:58px;padding:8px 14px;background:var(--card);border:2px solid var(--line);border-radius:30px;text-align:left}
+.opt .l{flex:none;font-weight:800;color:var(--gold)}.opt .f{font-family:"Cambria Math",Cambria,Georgia,serif;font-size:1.15rem;overflow-x:auto}
+.opt.sel{border-color:var(--gold);background:var(--goldbg)}.opt.ok{border-color:var(--ok);background:var(--okbg)}.opt.bad{border-color:var(--bad);background:var(--badbg)}.opt.gone{visibility:hidden}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 .15em;font-size:.92em}
+.fr>span:first-child{border-bottom:1.5px solid currentColor;padding:0 .2em .05em}.fr>span:last-child{padding:.05em .2em 0}
+#aux,#fb{margin-top:12px;padding:12px;border-radius:12px;background:var(--card);border:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:8px;margin:5px 0}.bar .bl{width:1.2em;font-weight:800;color:var(--gold)}
+.bt{flex:1;height:16px;background:var(--grid);border-radius:8px;overflow:hidden}.bt div{height:100%;background:var(--gold)}.bar .pc{width:3.2em;text-align:right;font-size:.9rem}
+details{margin-top:14px}summary{cursor:pointer;color:var(--mut)}
+ol{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column}
+li{padding:4px 10px;border-radius:8px;font-size:.9rem}li.safe{color:var(--gold);font-weight:700}li.done{opacity:.45}li.cur{background:var(--gold);color:#fff;font-weight:700}
+</style>
+</head>
+<body>
+<main>
+<section id="start"><div class="hero"><div class="m">🎲</div><h1>Kdo je pánem šancí?</h1>
+<p style="font-size:1.25rem;font-weight:800">Začínáš jako Nováček u automatu.</p>
+<p>Mince, kostky, ruleta, karty a loterie. Kasino na tobě rádo vydělává, protože většina lidí si pravděpodobnost „odhadne“. Ty ji budeš počítat. Jedna chyba a prohráváš jako u jednorukého bandity.</p>
+<p>Prorvi se přes milníky <b>Přeživší u stolu</b> a <b>Matematik kasina</b> a vypracuj se na <b>Krále pravděpodobnosti</b>.</p>
+<p style="color:var(--mut);font-size:.85rem">15 otázek od hodu mincí po paradoxy, na kterých se nachytají i dospělí. Čísla se při každé hře losují znovu, takže otázky se neopakují. Milníky: když se na ně dostaneš, níž už nespadneš. Nápovědy: 50:50, publikum a telefonát (kámoš po akci, nebo mistr), každá jen jednou.</p></div>
+<button class="big" id="go">Jdeme na to</button></section>
+<section id="game" hidden>
+<div class="top"><div id="qi"></div><div class="ll"><button class="lf" id="l5">50:50</button><button class="lf" id="la">👥</button><button class="lf" id="lp">📞</button></div></div>
+<div class="card" id="gr"></div>
+<h2 id="qh"></h2>
+<div class="opts" id="op"></div>
+<div id="aux" hidden></div>
+<button class="big" id="lock" disabled>Konečná odpověď</button>
+<button class="ghost" id="walk"></button>
+<div id="fb" hidden></div>
+<button class="big" id="next" hidden></button>
+<details><summary>Žebříček řešitelů</summary><ol id="lad"></ol></details>
+</section>
+<section id="end" hidden><div class="hero"><div class="m" id="em"></div><h1 id="et"></h1><p id="ep"></p></div><button class="big" id="again">Hrát znovu</button></section>
+</main>
+<script>
+const R=Math.random,LET='ABCD',nb='\u00a0',$=id=>document.getElementById(id);
+const pick=a=>a[Math.floor(R()*a.length)],ri=(a,b)=>a+Math.floor(R()*(b-a+1));
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const LV=['Nováček u automatu','Drobná ryba','Stálý host kasina','Kibic u stolu','Počtář','Přeživší u stolu','Kartař','Učeň krupiéra','Nenaletíš bludu','Počítač šancí','Matematik kasina','Hráč na jistotu','Loterista','Pán dveří','Šéf kasina','Král pravděpodobnosti'];
+const PN=['','Mince, kostky a ruleta','Jevy, omyly a karty','Paradoxy, loterie a kasino'];
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+const nn=(v,d=2)=>{const r=Math.round(v*10**d)/10**d,s=String(r).split('.');s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'\u00a0');return s.join(',')};
+const frac=(a,b)=>`<span class="fr"><span>${a}</span><span>${b}</span></span>`;
+const fi=(a,b)=>{const g=gcd(a,b);a/=g;b/=g;return{val:a/b,html:b===1?'1':frac(a,b),say:a+'/'+b}};
+const ti=(t,v=t)=>({val:v,html:t,say:t});
+const eq=(x,y)=>typeof x==='number'&&typeof y==='number'?Math.abs(x-y)<1e-9:x===y;
+function build(q,c,w,why){
+ const seen=[c.val],ws=[];
+ shuffle(w.slice()).forEach(x=>{if(ws.length<3&&!seen.some(s=>eq(s,x.val))){seen.push(x.val);ws.push(x)}});
+ const it=shuffle([{...c,ok:true},...ws.map(x=>({...x,ok:false}))]);
+ return{head:'Vyber správnou odpověď:',gr:`<div class="wp"><b>${q}</b></div>`,items:it.map(x=>({ok:x.ok,html:x.html,say:'je to „'+x.say+'“'})),why};
+}
+const comb=(n,k)=>{let r=1;for(let i=1;i<=k;i++)r=r*(n-k+i)/i;return Math.round(r)};
+const perm=(n,k)=>{let r=1;for(let i=0;i<k;i++)r*=n-i;return r};
+const G=[
+()=>{if(R()<.5)return build('Hodíš korunou. Jaká je pravděpodobnost, že padne líc?',ti('50 %',50),[ti('25 %',25),ti('75 %',75),ti('100 %',100),ti('10 %',10)],'Dvě stejně pravděpodobné možnosti, jedna příznivá: 1/2 = 50 %.');
+ let b=ri(2,9),c;do{c=ri(2,9)}while(c===b);
+ return build(`V pytlíku je ${b} modrých a ${c} červených kuliček. Vytáhneš poslepu jednu. Jaká je šance, že bude modrá?`,fi(b,b+c),[fi(b,c),fi(c,b+c),fi(1,b+c),fi(1,2),fi(b,b+c+1)],`Příznivých je ${b} z ${b+c} všech: ${b}/${b+c}.`)},
+()=>{const k=ri(2,5),T=[[`padne číslo menší než ${k}`,k-1],['padne číslo dělitelné třemi',2],['padne prvočíslo',3],[`padne číslo větší než ${k}`,6-k],['padne šestka',1]],[t,f]=pick(T);
+ return build(`Hodíš běžnou kostkou. Jaká je šance, že ${t}?`,fi(f,6),[fi(f+1,6),fi(f,12),fi(1,6),fi(f+2,6),fi(f,5)],`Příznivých stěn je ${f} ze 6: ${f}/6.`)},
+()=>{const T=[['Evropská ruleta má 37 polí (0 až 36). Vsadíš na jedno číslo. Jaká je šance, že trefíš?',fi(1,37),[fi(1,36),fi(1,38),fi(1,2),fi(36,37)],'Jedno příznivé pole z 37: 1/37, tedy asi 2,7 %.'],
+ ['Evropská ruleta má 37 polí (0 až 36). Vsadíš na tucet, tedy na 12 čísel. Jaká je šance na výhru?',fi(12,37),[fi(12,36),fi(1,3),fi(12,38),fi(1,12)],'Příznivých polí je 12 z 37. Nula se do žádného tuctu nepočítá.'],
+ ['Americká ruleta má 38 polí (0, 00 a čísla 1 až 36). Vsadíš na jedno číslo. Jaká je šance, že trefíš?',fi(1,38),[fi(1,36),fi(1,37),fi(1,2),fi(37,38)],'Jedno příznivé pole z 38: 1/38. Dvě nuly dělají hru pro hráče ještě horší.']];
+ return build(...pick(T).reduce((a,x,i)=>{a[[0,1,2,3][i]]=x;return a},[]))},
+()=>{const T=[['Na evropské ruletě (37 polí) vsadíš na červenou. Je 18 červených, 18 černých a nula je zelená. Jaká je šance na výhru?',fi(18,37),[fi(1,2),fi(19,37),fi(18,38),fi(17,37)],'Příznivých polí je 18 z 37. Právě ta zelená nula dává kasinu výhodu.'],
+ ['Na americké ruletě (38 polí, dvě zelené nuly) vsadíš na červenou. Je 18 červených polí. Jaká je šance na výhru?',fi(18,38),[fi(1,2),fi(18,37),fi(9,20),fi(17,38)],'Příznivých polí je 18 z 38, tedy 9/19. Je to méně než půl.'],
+ ['Na evropské ruletě vsadíš na dvě sousední čísla najednou (tzv. split). Jaká je šance na výhru?',fi(2,37),[fi(1,37),fi(2,36),fi(1,18),fi(2,38)],'Příznivá jsou 2 pole z 37: 2/37.']];
+ return build(...pick(T).reduce((a,x,i)=>{a[i]=x;return a},[]))},
+()=>{const N=pick([32,52]),k0=pick([['eso',4],['srdcovou kartu',N/4],['eso nebo krále',8]]),o=N===32?52:32;
+ return build(`Táhneš jednu kartu z ${N===32?'mariášového':'pokerového'} balíčku (${N} karet). Jaká je šance, že vytáhneš ${k0[0]}?`,fi(k0[1],N),[fi(k0[1],o),fi(1,N),fi(1,k0[1]),fi(k0[1]*2,N),fi(k0[1],N*2)],`Příznivých karet je ${k0[1]} z ${N}: ${fi(k0[1],N).say}.`)},
+()=>{const n=ri(3,5),T=[[`Hodíš ${n}krát po sobě mincí. Jaká je šance, že padne ${n}krát líc?`,fi(1,2**n),[fi(1,2*n),fi(1,2**(n-1)),fi(1,2**(n+1)),fi(1,n*n),fi(1,2**(n+2)),fi(n,2**n)],`Nezávislé jevy se násobí: (1/2)^${n} = 1/${2**n}.`],
+ ['Hodíš kostkou dvakrát. Jaká je šance, že padnou dvě šestky po sobě?',fi(1,36),[fi(1,12),fi(1,6),fi(1,18),fi(1,3)],'Nezávislé jevy se násobí: 1/6 · 1/6 = 1/36.'],
+ ['Hodíš kostkou dvakrát. Jaká je šance, že oba hody budou sudé číslo?',fi(1,4),[fi(1,2),fi(1,6),fi(1,3),fi(1,8)],'Sudé číslo padne s šancí 1/2, dvakrát po sobě 1/2 · 1/2 = 1/4.'],
+ ['Hodíš kostkou dvakrát. Jaká je šance, že napoprvé padne šestka a podruhé liché číslo?',fi(1,12),[fi(1,8),fi(1,6),fi(1,2),fi(2,3)],'1/6 · 1/2 = 1/12.']];
+ const t=pick(T);return build(...t.reduce((a,x,i)=>{a[i]=x;return a},[]))},
+()=>{if(R()<.3)return build('Hodíš dvěma kostkami a sečteš oči. Který součet padne nejčastěji?',ti('7'),[ti('6'),ti('8'),ti('12'),ti('2'),ti('9')],'Součet 7 jde složit šesti způsoby (1+6, 2+5, ... 6+1) z 36. Krajní součty jen jedním.');
+ const s=pick([4,5,6,8,9,10,11]),c=6-Math.abs(s-7);
+ return build(`Hodíš dvěma kostkami a sečteš oči. Jaká je šance, že součet bude ${s}?`,fi(c,36),[fi(c,12),fi(1,36),fi(c,6),fi(c+1,36),fi(c*2,36)],`Součet ${s} jde složit ${c} z 36 možných dvojic: ${fi(c,36).say}.`)},
+()=>{const T=[()=>{const n=ri(5,9);return[`Hodil jsi mincí ${n}krát po sobě a pokaždé padl ${pick(['líc','rub'])}. Jaká je šance, že při dalším hodu padne zase to samé?`,'50 %',n]},
+ ()=>{const n=ri(3,5);return[`Hodil jsi kostkou ${n}krát po sobě a pokaždé padla šestka. Jaká je šance, že při dalším hodu padne šestka znovu?`,'1/6',n]},
+ ()=>{const n=ri(5,8);return[`Na evropské ruletě padla ${n}krát po sobě černá. Jaká je šance, že padne černá i příště?`,'18/37',n]}],
+ [q,b,n]=pick(T)();
+ return build(q,ti(`Přesně ${b}, každý hod je nezávislý`),[ti(`Menší než ${b}, protože už to padlo ${n}krát`),ti(`Větší než ${b}, teď už musí přijít opak`),ti('Nedá se určit')],`Mince, kostka ani ruleta si nic nepamatují. Hody jsou nezávislé a šance zůstává ${b}. Tomuhle omylu se říká klam hazardního hráče.`)},
+()=>{if(R()<.7){const n=ri(2,5),p=m=>100*(1-1/2**m),f=m=>ti(nn(p(m),3)+' %',p(m));
+ return build(`Hodíš ${n}krát mincí. Jaká je šance, že aspoň jednou padne líc?`,f(n),[ti('50 %',50),ti('100 %',100),f(n-1),f(n+1),ti(nn(100/2**n,3)+' %',100/2**n)],`Opačný jev: ${n}krát po sobě rub = (1/2)^${n} = 1/${2**n}. Takže 1 − 1/${2**n} = ${nn(p(n),3)} %.`)}
+ return build('Hodíš kostkou dvakrát. Jaká je šance, že aspoň jednou padne šestka?',fi(11,36),[fi(1,3),fi(25,36),fi(5,18),fi(1,6)],'Opačný jev: dvakrát ne šestka = 5/6 · 5/6 = 25/36. Takže 1 − 25/36 = 11/36.')},
+()=>{const [N,nm,a,b]=pick([[52,'esa',4,'es'],[32,'esa',4,'es'],[52,'srdcové',13,'srdcových karet'],[32,'srdcové',8,'srdcových karet']]),k=a,r=fi(k*(k-1),N*(N-1));
+ return build(`Z ${N} karet, mezi nimiž je ${k} ${b}, táhneš dvě karty bez vracení. Jaká je šance, že obě budou ${nm}?`,r,[fi(k*k,N*N),fi(k*(k-1),N*N),fi(k,N*(N-1)),fi(k*(k-1),(N-1)*(N-1))],`${k}/${N} · ${k-1}/${N-1} = ${k*(k-1)}/${N*(N-1)} = ${r.say}. Podruhé už je v balíčku o kartu méně a o jednu příznivou méně.`)},
+()=>{const [p,n,w]=pick([[50,23,[183,60,365]],[90,41,[329,100,183]],[99,57,[361,100,183]]]);
+ return build(`Kolik lidí musí být v místnosti, aby šance, že mají aspoň dva stejné narozeniny, přesáhla ${p} %?`,ti(String(n)),w.map(x=>ti(String(x))),`Počítá se opačný jev (všichni mají různé narozeniny). Šance ${p} % se překročí právě u ${n} lidí. Většina lidí to odhaduje mnohem výš.`)},
+()=>{const [n,k]=pick([[49,6],[45,6],[35,5],[50,5],[40,5]]),C=comb(n,k),f=v=>ti('1 : '+nn(v,0),v);
+ return build(`Loterie ${k} z ${n}: tipuješ ${k} čísel. Jaká je šance na jackpot (všech ${k} správně)?`,f(C),[f(C*10),f(Math.round(C/10)),f(perm(n,k))],`Počet možných ${k===6?'šestic':'pětic'} je kombinační číslo C(${n}, ${k}) = ${nn(C,0)}. Právě jedna vyhrává.`)},
+()=>{const N=pick([3,4,5,10]);
+ return build(`Je ${N} dveří a za jedněmi je auto. Vybereš si jedny. Moderátor, který ví, kde auto je, otevře ${N-2} ze zbylých dveří: všechny jsou prázdné. Zbudou ti tvoje dveře a jedny zavřené. Jaká je šance na výhru, když změníš volbu?`,fi(N-1,N),[fi(1,2),fi(1,N),ti('100 %',1),fi(N-2,N)],`Tvůj původní tip vyhrává s šancí 1/${N} a tu moderátor nezmění. Zbylých ${N-1}/${N} se přesune na jediné druhé zavřené dveře.`)},
+()=>{const v=pick([50,100,200,500]),[N,pn,win,txt]=pick([[37,1,35,'na jedno číslo (při výhře ti vyplatí 35násobek vkladu a vklad ti zůstane)'],[37,18,1,'na červenou (je 18 červených polí; při výhře dostaneš navíc tolik, kolik jsi vsadil, a vklad ti zůstane)'],[38,1,35,'na jedno číslo (při výhře ti vyplatí 35násobek vkladu a vklad ti zůstane)']]),
+ p=pn/N,ev=p*win*v-(1-p)*v,F=x=>Math.abs(x)<1e-9?'0 Kč':(x>0?'+':'−')+nn(Math.abs(x),2)+' Kč',t=x=>ti(F(x),x);
+ return build(`Na ${N===37?'evropské':'americké'} ruletě (${N} polí) vsadíš ${v} Kč ${txt}. Jaký je průměrný výsledek jedné hry?`,t(ev),[t(-ev),t(0),t(-v),t(ev*N/(N-1))],`Střední hodnota: ${fi(pn,N).say} · ${nn(win*v,0)} + ${fi(N-pn,N).say} · (−${v}) = ${F(ev)}. Dlouhodobě vyhrává kasino.`)},
+()=>{const [p,a]=pick([[1,99],[1,95],[2,95],[1,90],[0.5,99],[5,90]]),N=100000,sk=N*p/100,tp=sk*a/100,fp=(N-sk)*(100-a)/100,P=tp/(tp+fp)*100,pc=x=>ti(nn(x,1)+' %',x);
+ return build(`Nemoc má ${nn(p,1)} % lidí. Test označí ${a} % nemocných jako pozitivní a ${a} % zdravých jako negativní. Tvůj test vyšel pozitivně. Jaká je šance, že jsi opravdu nemocný?`,pc(P),[pc(a),pc(p),pc(50),pc(90),pc(10)],`Na ${nn(N,0)} lidí je ${nn(sk,0)} nemocných (z nich ${nn(tp,0)} pozitivních) a ${nn(N-sk,0)} zdravých (z nich ${nn(fp,0)} falešně pozitivních). Pozitivních je ${nn(tp+fp,0)}, nemocných z nich ${nn(tp,0)}, tedy ${nn(P,1)} %.`)}];
+const MK=G;
+/* ===== hra ===== */
+let q,cur,items,hid,sel,locked,used,rid=0,armed=false,dcats=[];
+const show=id=>['start','game','end'].forEach(s=>$(s).hidden=s!==id);
+const vis=()=>[...items.keys()].filter(i=>!hid.has(i)),ci=()=>items.findIndex(i=>i.ok);
+const safeAt=i=>i>=10?LV[10]:i>=5?LV[5]:LV[0];
+function start(){q=0;used={f:0,a:0,p:0};dcats=shuffle([0,1,2,3,ri(0,3),ri(0,3),ri(0,3)]);show("game");round()}
+function lifelines(){[['l5','f'],['la','a'],['lp','p']].forEach(([id,k])=>{$(id).disabled=!!used[k]||locked;$(id).classList.toggle('used',!!used[k])})}
+function ladder(){let h='';for(let i=15;i>=0;i--)h+=`<li class="${i===q?'cur':i<q?'done':''} ${i===5||i===10?'safe':''}">${i===15?'🏆 ':''}${LV[i]}${i===5||i===10?' 🔒 milník':''}</li>`;$('lad').innerHTML=h}
+function round(){
+ rid++;const part=q<5?1:q<10?2:3;cur=MK[q]();items=cur.items;hid=new Set();sel=null;locked=false;armed=false;
+ $('gr').hidden=!cur.gr;$('gr').innerHTML=cur.gr;$('qh').innerHTML=cur.head;
+ $('op').innerHTML=items.map((it,i)=>`<button class="opt" data-i="${i}"><span class="l">${LET[i]}:</span><span class="f">${it.html}</span></button>`).join('');
+ ['aux','fb','next'].forEach(id=>$(id).hidden=true);
+ $('qi').innerHTML=`Část ${part}/3: ${PN[part]}<br>Otázka <b>${q+1}</b> z 15 · úroveň <b style="color:var(--gold)">${LV[q]}</b>`;
+ $('lock').hidden=false;$('lock').disabled=true;$('walk').hidden=false;
+ $('walk').textContent=q?`Vzdát to a zůstat: ${LV[q]}`:'Vzdát hru';lifelines();ladder();
+}
+$('go').onclick=start;$('again').onclick=start;
+$('op').onclick=e=>{const b=e.target.closest('.opt');if(!b||locked)return;const i=+b.dataset.i;if(hid.has(i))return;
+ sel=i;document.querySelectorAll('.opt').forEach((el,k)=>el.classList.toggle('sel',k===i));$('lock').disabled=false};
+$('l5').onclick=()=>{used.f=1;shuffle(vis().filter(i=>!items[i].ok)).slice(0,2).forEach(i=>{hid.add(i);document.querySelectorAll('.opt')[i].classList.add('gone')});
+ if(hid.has(sel)){sel=null;$('lock').disabled=true;document.querySelectorAll('.opt').forEach(e=>e.classList.remove('sel'))}lifelines()};
+$('la').onclick=()=>{used.a=1;const v=vis(),c=ci();
+ let pc=Math.min(.95,Math.max(.3,.88-q*.04+(R()-.5)*.2));if(v.length===2)pc=Math.min(.95,pc+.2);
+ const wr=v.filter(i=>i!==c),w=wr.map(()=>R()+.15),s=w.reduce((a,b)=>a+b,0),pct={};pct[c]=Math.round(pc*100);let acc=pct[c];
+ wr.forEach((i,k)=>{if(k<wr.length-1){pct[i]=Math.round((1-pc)*100*w[k]/s);acc+=pct[i]}else pct[i]=Math.max(0,100-acc)});
+ $('aux').innerHTML='<b>Hlasuje publikum</b>'+v.map(i=>`<div class="bar"><span class="bl">${LET[i]}</span><div class="bt"><div style="width:${pct[i]}%"></div></div><span class="pc">${pct[i]}${nb}%</span></div>`).join('');
+ $('aux').hidden=false;lifelines()};
+$('lp').onclick=()=>{used.p=1;const my=rid,tc=R()<.5,nm=tc?pick(['mistr Novák','mistr Svoboda','mistr Horák','paní učitelka Černá']):pick(['Franta','Tomáš','Jirka','Kuba','Pepa']);
+ $('aux').innerHTML=tc?`📞 Voláš (${nm})…`:`📞 Voláš kámošovi (${nm}) po akci… dlouho to vyzvání…`;$('aux').hidden=false;lifelines();
+ setTimeout(()=>{if(my!==rid)return;
+  const v=vis(),c=ci(),pc=Math.max(.25,.75-q*.03),good=tc||R()<pc,wr=v.filter(i=>i!==c),ch=(good||!wr.length)?c:pick(wr);
+  const pre=tc?pick(['Tady mistr, jen se na to podívám.','Hm, tohle dávám v prváku každý rok.','Poslouchej, nebudu to opakovat.']):pick(['Hééj, to seš ty! Počkej, jdu ven, tady hrozně hučí hudba…','Čóóó? Neslyším tě… *škytnutí* …jo, jo, jsem to já.','Brácho, já jsem teď dost mimo, ale zkusím to…','Haló? …kde to vlastně jsem? Ale jo, poslouchám.']);
+  const post=tc?pick(['A příště se ozvi v pracovní době. 😉','Zapiš si to do sešitu, ne na ruku.','Hodně štěstí a nezkaz to.']):pick(['Ale nic nezaručuju, dneska už byl pátý panák. *škytnutí*','Věř mi, bráško! …nebo ne. Já nevím. Čau.','Hele, já už musím, tady začíná karaoke!']);
+  const mid=tc?`Správná odpověď je ${LET[c]}. ${cur.why}`:`No takže… podle mě ${items[ch].say}, takže ${LET[ch]}.`;
+  $('aux').innerHTML=`<b>${nm}:</b> „${pre} ${mid} ${post}“`},1600)};
+$('lock').onclick=()=>{if(sel===null)return;locked=true;lifelines();$('lock').hidden=true;$('walk').hidden=true;const my=rid;setTimeout(()=>{if(my===rid)reveal()},1400)};
+function reveal(){
+ const ok=items[sel].ok;
+ document.querySelectorAll('.opt').forEach((el,i)=>{el.classList.remove('sel');if(items[i].ok)el.classList.add('ok');else if(i===sel)el.classList.add('bad')});
+ $('fb').innerHTML=`<b>${ok?'Správně!':'Bohužel ne. Správná odpověď: '+LET[ci()]+'.'}</b> ${cur.why}`;
+ $('fb').hidden=false;const b=$('next');b.hidden=false;
+ if(ok){if(q===14){b.textContent='Převzít titul 🎉';b.onclick=()=>end('win',LV[15])}else{b.textContent=`Postup na úroveň ${LV[q+1]}! ${q===4||q===9?'Další část →':'Další otázka →'}`;b.onclick=()=>{q++;round();window.scrollTo({top:0,behavior:'smooth'})}}}
+ else{b.textContent='Pokračovat';b.onclick=()=>end('lose',safeAt(q))}
+ b.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+$('walk').onclick=()=>{if(!armed){armed=true;$('walk').textContent='Opravdu to vzdát? Klikni znovu.';return}end('walk',LV[q])};
+function end(k,amt){
+ $('em').textContent=k==='win'?'🏆':k==='walk'?'🚪':amt!==LV[0]?'👏':'😕';
+ $('et').textContent=k==='win'?'Jsi král pravděpodobnosti!':k==='walk'?'Odcházíš od stolu s hlavou vztyčenou':'Tady to skončilo';
+ $('ep').innerHTML=`Tvoje konečná úroveň: <b>${amt}</b>.`+(k==='lose'?(amt!==LV[0]?' Zachránil tě milník, níž už nespadneš.':' Žádný milník, zpátky na začátek. Zkus to znovu.'):'');
+ show('end');
+}
+</script>
+</body>
+</html>
