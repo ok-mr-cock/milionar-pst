@@ -157,7 +157,7 @@ $('la').onclick=()=>{used.a=1;const v=vis(),c=ci();
  wr.forEach((i,k)=>{if(k<wr.length-1){pct[i]=Math.round((1-pc)*100*w[k]/s);acc+=pct[i]}else pct[i]=Math.max(0,100-acc)});
  $('aux').innerHTML='<b>Hlasuje publikum</b>'+v.map(i=>`<div class="bar"><span class="bl">${LET[i]}</span><div class="bt"><div style="width:${pct[i]}%"></div></div><span class="pc">${pct[i]}${nb}%</span></div>`).join('');
  $('aux').hidden=false;lifelines()};
-$('lp').onclick=()=>{used.p=1;const my=rid,tc=R()<.5,nm=tc?pick(['mistr Novák','mistr Svoboda','mistr Horák','paní učitelka Černá']):pick(['Franta','Tomáš','Jirka','Kuba','Pepa']);
+$('lp').onclick=()=>{used.p=1;const my=rid,tc=R()<.5,nm=tc?pick(['mistr Bittner','mistr Peroutka','mistr Cock','paní učitelka Bílá']):pick(['Franta','Tomáš','Jirka','Kuba','Pepa']);
  $('aux').innerHTML=tc?`📞 Voláš (${nm})…`:`📞 Voláš kámošovi (${nm}) po akci… dlouho to vyzvání…`;$('aux').hidden=false;lifelines();
  setTimeout(()=>{if(my!==rid)return;
   const v=vis(),c=ci(),pc=Math.max(.25,.75-q*.03),good=tc||R()<pc,wr=v.filter(i=>i!==c),ch=(good||!wr.length)?c:pick(wr);
